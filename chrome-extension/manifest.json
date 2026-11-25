@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "AI Video Studio",
+  "version": "1.0",
+  "description": "Download and AI-enhance any video from Chrome websites with 1 click.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Video Studio"
+  }
+}

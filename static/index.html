@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniStudio Pro — Video Downloader, AI Enhancer &amp; Web Scraper</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --sidebar-bg: rgba(13, 18, 32, 0.92);
+      --card-bg: rgba(18, 24, 42, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #06b6d4;
+      --purple: #a855f7;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    body {
+      background:
+        radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.12) 0%, transparent 45%),
+        var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--card-border);
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 8px 20px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 18px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-title { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+    .brand-sub { font-size: 11px; color: var(--text-muted); }
+
+    .nav-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.18s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.15);
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 10px; }
+
+    .nav-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+    .nav-item.active .nav-pill { background: var(--primary); color: #fff; }
+
+    .telemetry-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .telemetry-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      background: var(--amber);
+    }
+    .dot.ok { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+    .dot.warn { background: var(--amber); }
+
+    /* MAIN CONTENT */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 26px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-desc { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
+
+    .view-section { display: none; animation: fadeIn 0.22s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* CONTROLS */
+    .segmented {
+      display: inline-flex;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 16px;
+      gap: 4px;
+    }
+
+    .seg-btn {
+      padding: 8px 16px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .seg-btn.active { background: var(--primary); color: #fff; }
+
+    .input-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+
+    input[type="text"], input[type="url"], input[type="number"], textarea, select {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+    }
+
+    .flex-1 { flex: 1; min-width: 220px; }
+    textarea { width: 100%; min-height: 110px; resize: vertical; line-height: 1.5; }
+
+    .btn {
+      padding: 11px 18px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.18s;
+      color: #fff;
+      text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
+    .btn-purple { background: linear-gradient(135deg, var(--purple), var(--primary)); }
+    .btn-purple:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4); }
+    .btn-emerald { background: linear-gradient(135deg, var(--emerald), #059669); }
+    .btn-emerald:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); }
+    .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+    .btn-danger { background: rgba(239, 68, 68, 0.16); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.28); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .checkbox-label input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+    .auto-enhance-panel {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(168, 85, 247, 0.08);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* PREVIEW & QUALITY */
+    .preview-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+    @media (max-width: 820px) { .preview-layout { grid-template-columns: 1fr; } }
+
+    .media-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+    .media-box img, .media-box video, .media-box iframe { width: 100%; height: 100%; object-fit: cover; border: none; }
+
+    .quality-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+    .quality-pill {
+      padding: 7px 12px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .quality-pill.active { background: rgba(99, 102, 241, 0.25); border-color: var(--primary); color: #fff; }
+
+    /* PROGRESS */
+    .progress-box { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--card-border); }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-muted); }
+    .progress-bg { height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden; margin: 8px 0; }
+    .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.25s ease; }
+    .progress-fill.enhancing { background: linear-gradient(90deg, var(--purple), var(--accent)); }
+
+    /* ENHANCER */
+    .dropzone {
+      border: 2px dashed rgba(168, 85, 247, 0.45);
+      background: rgba(168, 85, 247, 0.06);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--purple); background: rgba(168, 85, 247, 0.14); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* SCRAPER MODE CARDS & TABLE */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .mode-card {
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+    }
+    .mode-card:hover { border-color: rgba(6, 182, 212, 0.45); transform: translateY(-1px); }
+    .mode-card.active {
+      background: rgba(6, 182, 212, 0.14);
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.15);
+    }
+    .mode-card .icon { font-size: 20px; margin-bottom: 4px; }
+    .mode-card .label { font-size: 12.5px; font-weight: 700; }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 440px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      margin-top: 12px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th {
+      position: sticky;
+      top: 0;
+      background: #131c31;
+      color: #cbd5e1;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: #fff; }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    tr:hover td { background: rgba(255, 255, 255, 0.04); }
+
+    /* LIST ITEMS */
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.18);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .badge-purple { background: rgba(168, 85, 247, 0.18); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.35); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.35); }
+    .badge-cyan { background: rgba(6, 182, 212, 0.18); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35); }
+
+    /* TOASTS */
+    .toast-container {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2000;
+    }
+    .toast {
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: #111827;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.2s ease;
+      max-width: 360px;
+    }
+    .toast.success { border-color: rgba(16, 185, 129, 0.5); }
+    .toast.error { border-color: rgba(239, 68, 68, 0.6); color: #fecaca; }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      padding: 20px;
+    }
+    .modal-content {
+      width: 100%;
+      max-width: 880px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; padding: 14px; }
+      .nav-list { flex-direction: row; flex-wrap: wrap; }
+      .telemetry-card { display: none; }
+      .main { padding: 18px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-title">OmniStudio Pro</div>
+          <div class="brand-sub">Download • Enhance • Scrape</div>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <div class="nav-item active" data-view="downloader">
+          <span class="nav-left">🎬 Downloader</span>
+          <span class="nav-pill">8x</span>
+        </div>
+        <div class="nav-item" data-view="enhancer">
+          <span class="nav-left">✨ AI Enhancer</span>
+          <span class="nav-pill">2x/4x</span>
+        </div>
+        <div class="nav-item" data-view="scraper">
+          <span class="nav-left">🕷️ Web Scraper</span>
+          <span class="nav-pill">CSV</span>
+        </div>
+        <div class="nav-item" data-view="library">
+          <span class="nav-left">📁 Media Library</span>
+          <span class="nav-pill" id="libraryCountPill">0</span>
+        </div>
+        <div class="nav-item" data-view="jobs">
+          <span class="nav-left">⚡ Jobs Queue</span>
+          <span class="nav-pill" id="jobsCountPill">0</span>
+        </div>
+      </nav>
+    </div>
+
+    <div class="telemetry-card">
+      <div class="telemetry-row">
+        <span><span class="dot" id="dotGpu"></span>AI Engine</span>
+        <strong id="telGpu">Checking...</strong>
+      </div>
+      <div class="telemetry-row">
+        <span><span class="dot" id="dotFfmpeg"></span>FFmpeg Muxer</span>
+        <strong id="telFfmpeg">Checking...</strong>
+      </div>
+      <div class="telemetry-row">
+        <span><span class="dot" id="dotScraper"></span>OmniScrape</span>
+        <strong id="telScraper">Checking...</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 class="page-title" id="viewTitle">High-Speed Video Downloader</h1>
+        <p class="page-desc" id="viewDesc">Download single or batch videos at 8x concurrency with optional AI Super-Resolution.</p>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="openFolderTopBtn">📁 Open Studio Folder</button>
+    </div>
+
+    <!-- VIEW 1: VIDEO DOWNLOADER -->
+    <section class="view-section active" id="view-downloader">
+      <div class="card">
+        <div class="segmented">
+          <button class="seg-btn active" id="dlSingleTab">Single URL</button>
+          <button class="seg-btn" id="dlBatchTab">Batch URLs</button>
+        </div>
+
+        <!-- Single -->
+        <div id="dlSinglePanel">
+          <div class="input-row">
+            <input type="text" id="singleUrlInput" class="flex-1" placeholder="Paste any video URL (YouTube, Instagram, X, TikTok, Vimeo...)" />
+            <button class="btn btn-secondary" id="singlePasteBtn">📋 Paste</button>
+            <button class="btn btn-primary" id="singleAnalyzeBtn">Analyze &amp; Preview</button>
+          </div>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="useCookiesCheck" />
+            Use Chrome Cookies (for age-restricted or member videos)
+          </label>
+
+          <div class="auto-enhance-panel">
+            <label class="checkbox-label" style="color: #e9d5ff; font-weight: 600;">
+              <input type="checkbox" id="singleAutoEnhanceCheck" />
+              ✨ Auto-Enhance with AI Super-Resolution after download
+            </label>
+            <div style="display: flex; gap: 8px;">
+              <select id="singleEnhanceScale">
+                <option value="2">2x Upscale</option>
+                <option value="4">4x Upscale</option>
+              </select>
+              <select id="singleEnhanceDevice">
+                <option value="gpu">Auto (GPU / CPU)</option>
+                <option value="cpu">Force CPU</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Batch -->
+        <div id="dlBatchPanel" style="display: none;">
+          <textarea id="batchUrlsInput" placeholder="Paste multiple video URLs (one per line)..."></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="batchCookiesCheck" />
+              Use Chrome Cookies
+            </label>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" id="batchAnalyzeBtn">🔍 Preview All</button>
+              <button class="btn btn-primary" id="batchDownloadAllBtn">⚡ Download All</button>
+            </div>
+          </div>
+
+          <div class="auto-enhance-panel">
+            <label class="checkbox-label" style="color: #e9d5ff; font-weight: 600;">
+              <input type="checkbox" id="batchAutoEnhanceCheck" />
+              ✨ Auto-Enhance all downloaded videos
+            </label>
+            <select id="batchEnhanceScale">
+              <option value="2">2x Upscale</option>
+              <option value="4">4x Upscale</option>
+            </select>
+          </div>
+
+          <div id="batchContainer" style="margin-top: 14px; display: none;"></div>
+        </div>
+      </div>
+
+      <!-- Single Preview Card -->
+      <div class="card" id="singlePreviewCard" style="display: none;">
+        <div class="preview-layout">
+          <div class="media-box" id="playerArea"></div>
+          <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
+            <div>
+              <div id="previewTitle" style="font-size: 18px; font-weight: 700;">Video Title</div>
+              <div id="previewAuthor" style="font-size: 13px; color: var(--accent); margin-top: 4px;">Channel</div>
+            </div>
+            <div>
+              <div style="font-size: 12.5px; color: var(--text-muted);">Choose Quality:</div>
+              <div class="quality-pills" id="qualitySelector">
+                <button class="quality-pill active" data-quality="best">Best (4K/1080p)</button>
+                <button class="quality-pill" data-quality="1080p">1080p</button>
+                <button class="quality-pill" data-quality="720p">720p</button>
+                <button class="quality-pill" data-quality="480p">480p</button>
+                <button class="quality-pill" data-quality="audio">Audio MP3</button>
+              </div>
+              <button class="btn btn-primary" id="startSingleDownloadBtn" style="width: 100%;">⚡ Fast Download Video</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-box" id="singleProgressBox" style="display: none;">
+          <div class="progress-labels">
+            <span id="progState">Downloading...</span>
+            <span id="progPct" style="font-weight: 700; color: #fff;">0%</span>
+          </div>
+          <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
+          <div class="progress-labels">
+            <span id="progSpeed">Speed: --</span>
+            <span id="progEta">ETA: --</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: AI VIDEO ENHANCER -->
+    <section class="view-section" id="view-enhancer">
+      <div class="card">
+        <div class="dropzone" id="enhanceDropzone">
+          <div style="font-size: 15px; font-weight: 700; color: #e9d5ff; margin-bottom: 4px;">
+            📤 Drop a video file here or click to upload
+          </div>
+          <div id="selectedUploadName" style="font-size: 12.5px; color: var(--text-muted);">
+            Supports MP4, MKV, MOV, AVI, WEBM
+          </div>
+          <input type="file" id="enhanceFileInput" accept="video/*" style="display: none;" />
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Or Pick from Library</label>
+            <select id="enhanceLibrarySelect">
+              <option value="">-- Select downloaded video --</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Or Local File Path</label>
+            <input type="text" id="enhanceLocalPathInput" placeholder="C:\path\to\video.mp4" />
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="field">
+            <label>Upscale Factor</label>
+            <select id="enhanceScaleSelect">
+              <option value="2">2x Super-Resolution</option>
+              <option value="4">4x Ultra HD</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tile Size (VRAM Safe)</label>
+            <select id="enhanceTileSelect">
+              <option value="256">256 px (Balanced)</option>
+              <option value="128">128 px (Low VRAM)</option>
+              <option value="512">512 px (High VRAM)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Compute Device</label>
+            <select id="enhanceDeviceSelect">
+              <option value="gpu">Auto (CUDA GPU)</option>
+              <option value="cpu">Force CPU</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Checkpoint (.pth)</label>
+            <select id="enhanceModelSelect">
+              <option value="">Default RRDBNet</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn-purple" id="startEnhanceBtn" style="width: 100%;">✨ Enhance Video Now</button>
+
+        <div class="progress-box" id="enhanceProgressBox" style="display: none;">
+          <div class="progress-labels">
+            <span id="enhProgState">Initializing...</span>
+            <span id="enhProgPct" style="font-weight: 700; color: #fff;">0%</span>
+          </div>
+          <div class="progress-bg"><div class="progress-fill enhancing" id="enhProgFill"></div></div>
+          <div class="progress-labels">
+            <span id="enhProgSpeed">Speed: --</span>
+            <span id="enhProgEta">ETA: --</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: WEB SCRAPER & DATASET BUILDER -->
+    <section class="view-section" id="view-scraper">
+      <div class="card">
+        <div class="input-row">
+          <input type="url" id="scrapeUrlInput" class="flex-1" placeholder="Enter website URL to scrape (e.g. https://books.toscrape.com)" />
+          <button class="btn btn-secondary" id="toggleScrapeAdvancedBtn" title="Advanced Request Settings">⚙️ Pro Options</button>
+          <button class="btn btn-emerald" id="startScrapeBtn">🕷️ Scrape Website</button>
+        </div>
+
+        <div class="mode-grid" id="scrapeModeGrid">
+          <div class="mode-card active" data-mode="auto"><div class="icon">✨</div><div class="label">Smart Auto</div></div>
+          <div class="mode-card" data-mode="cards"><div class="icon">🛍️</div><div class="label">Product Cards</div></div>
+          <div class="mode-card" data-mode="tables"><div class="icon">📊</div><div class="label">HTML Tables</div></div>
+          <div class="mode-card" data-mode="json_ld"><div class="icon">🧬</div><div class="label">JSON-LD</div></div>
+          <div class="mode-card" data-mode="article"><div class="icon">📰</div><div class="label">Article Text</div></div>
+          <div class="mode-card" data-mode="links"><div class="icon">🔗</div><div class="label">All Links</div></div>
+          <div class="mode-card" data-mode="media"><div class="icon">🖼️</div><div class="label">Media &amp; Images</div></div>
+          <div class="mode-card" data-mode="contacts"><div class="icon">📇</div><div class="label">Contacts &amp; Socials</div></div>
+          <div class="mode-card" data-mode="selectors"><div class="icon">🎯</div><div class="label">Custom CSS</div></div>
+        </div>
+
+        <div id="customSelectorsDrawer" style="display: none; margin-bottom: 14px; padding: 12px; border-radius: 10px; background: rgba(15,23,42,0.7); border: 1px solid var(--card-border);">
+          <div class="grid-2" style="margin-bottom: 0;">
+            <div class="field">
+              <label>Item Container CSS Selector</label>
+              <input type="text" id="scrapeItemSelector" placeholder="e.g. article.product_pod" />
+            </div>
+            <div class="field">
+              <label>Fields JSON (name: selector[@attr])</label>
+              <input type="text" id="scrapeFieldsJson" placeholder='{"title": "h3 a@title", "price": ".price_color"}' />
+            </div>
+          </div>
+        </div>
+
+        <div id="scrapeAdvancedDrawer" style="display: none; margin-bottom: 14px; padding: 14px; border-radius: 10px; background: rgba(15,23,42,0.75); border: 1px solid var(--card-border);">
+          <div class="grid-4" style="margin-bottom: 10px;">
+            <div class="field">
+              <label>Rate Limit Delay (sec)</label>
+              <input type="number" id="scrapeDelayInput" value="0.5" min="0" max="10" step="0.5" />
+            </div>
+            <div class="field">
+              <label>HTTP/SOCKS Proxy</label>
+              <input type="text" id="scrapeProxyInput" placeholder="http://user:pass@host:port" />
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label>Custom Headers JSON</label>
+              <input type="text" id="scrapeHeadersInput" placeholder='{"Accept-Language": "en-US,en;q=0.9"}' />
+            </div>
+          </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="scrapeDedupCheck" checked />
+            Automatically deduplicate extracted records
+          </label>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Pagination Crawl:</span>
+          <input type="range" id="scrapePagesRange" min="1" max="20" value="1" style="flex: 1; accent-color: var(--accent);" />
+          <span class="badge badge-cyan" id="scrapePagesBadge">1 page</span>
+        </div>
+
+        <div id="scrapeHistoryBar" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--card-border); display: flex; flex-wrap: wrap; gap: 8px; align-items: center;"></div>
+      </div>
+
+      <!-- Discovered Media Links Banner -->
+      <div class="card" id="discoveredMediaCard" style="display: none; border-color: rgba(99, 102, 241, 0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <div style="font-weight: 700; font-size: 15px;">🎬 Discovered Video / Media Links (<span id="mediaLinksCount">0</span>)</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Send scraped video links directly to the 8x Downloader</div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="sendAllMediaToBatchBtn">📦 Send All to Batch Downloader</button>
+        </div>
+        <div id="discoveredMediaList" style="max-height: 160px; overflow-y: auto;"></div>
+      </div>
+
+      <!-- Scrape Results Card -->
+      <div class="card" id="scrapeResultsCard" style="display: none;">
+        <!-- Telemetry & Stats -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--card-border);">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <span class="badge badge-emerald" id="scrapeHttpBadge">HTTP 200</span>
+            <span class="badge badge-cyan" id="scrapeLatencyBadge">-- ms</span>
+            <span class="badge" id="scrapeSizeBadge">-- KB</span>
+            <span class="badge badge-purple" id="scrapeStrategyBadge">Strategy: -</span>
+            <span class="badge badge-emerald" id="scrapeRowsBadge">0 rows</span>
+            <span class="badge" id="scrapeDedupBadge">0 deduped</span>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <a href="/api/scrape/export?format=csv" class="btn btn-emerald btn-sm">📥 CSV</a>
+            <a href="/api/scrape/export?format=json" class="btn btn-secondary btn-sm">📥 JSON</a>
+            <a href="/api/scrape/export?format=jsonl" class="btn btn-secondary btn-sm">📥 JSONL</a>
+            <a href="/api/scrape/export?format=md" class="btn btn-secondary btn-sm">📥 Markdown</a>
+          </div>
+        </div>
+
+        <!-- Results Sub-Tabs + Search -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+          <div class="segmented" style="margin-bottom: 0;">
+            <button class="seg-btn active" data-scrapetab="table">📊 Data Table</button>
+            <button class="seg-btn" data-scrapetab="schema">🧬 Schema &amp; Quality</button>
+            <button class="seg-btn" data-scrapetab="json">📄 Raw JSON</button>
+          </div>
+          <input type="text" id="scrapeFilterInput" placeholder="Filter table rows..." style="padding: 7px 12px; font-size: 12.5px; width: 220px;" />
+        </div>
+
+        <!-- Tab 1: Table -->
+        <div id="scrapeTab-table" class="table-wrap">
+          <table>
+            <thead><tr id="scrapeTableHead"></tr></thead>
+            <tbody id="scrapeTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Tab 2: Schema & Quality -->
+        <div id="scrapeTab-schema" style="display: none;">
+          <div id="scrapeSchemaList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 8px;"></div>
+        </div>
+
+        <!-- Tab 3: Raw JSON -->
+        <div id="scrapeTab-json" style="display: none;">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+            <button class="btn btn-secondary btn-sm" id="copyRawJsonBtn">📋 Copy JSON</button>
+          </div>
+          <pre id="scrapeRawJsonPre" style="background: rgba(15,23,42,0.9); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; max-height: 420px; overflow: auto; font-family: monospace; font-size: 12px; color: #a5f3fc; white-space: pre-wrap;"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: MEDIA LIBRARY -->
+    <section class="view-section" id="view-library">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+          <div class="segmented" style="margin-bottom: 0;">
+            <button class="seg-btn active" data-libfilter="all">All</button>
+            <button class="seg-btn" data-libfilter="video">Videos</button>
+            <button class="seg-btn" data-libfilter="enhanced">AI Enhanced</button>
+            <button class="seg-btn" data-libfilter="audio">Audio</button>
+          </div>
+          <input type="text" id="librarySearchInput" placeholder="Search files..." style="padding: 8px 12px; font-size: 13px; width: 240px;" />
+        </div>
+        <div id="downloadsHistoryList">
+          <div style="color: var(--text-muted); text-align: center; padding: 24px;">No files yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: JOBS QUEUE -->
+    <section class="view-section" id="view-jobs">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div style="font-weight: 700; font-size: 15px;">Recent &amp; Active Tasks</div>
+          <button class="btn btn-secondary btn-sm" id="refreshJobsBtn">🔄 Refresh</button>
+        </div>
+        <div id="jobsQueueList">
+          <div style="color: var(--text-muted); text-align: center; padding: 24px;">No jobs started in this session yet.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Video Player Modal -->
+  <div class="modal" id="videoModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <span id="modalVideoTitle" style="font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 680px;">Playing Video</span>
+        <button id="closeModalBtn" class="btn btn-secondary btn-sm">✕ Close</button>
+      </div>
+      <div style="position: relative; padding-top: 56.25%; background: #000;">
+        <video id="modalVideoElement" controls autoplay style="position: absolute; inset: 0; width: 100%; height: 100%;"></video>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // Toast System
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = message;
+      box.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transition = 'opacity 0.25s';
+        setTimeout(() => t.remove(), 260);
+      }, 3600);
+    }
+
+    // Navigation
+    const VIEW_META = {
+      downloader: ['High-Speed Video Downloader', 'Download single or batch videos at 8x concurrency with optional AI Super-Resolution.'],
+      enhancer: ['AI Video Super-Resolution', 'Upscale local or downloaded videos by 2x or 4x using tiled RRDBNet neural inference.'],
+      scraper: ['OmniScrape Web Studio', 'Extract structured datasets from any website to CSV/JSON and harvest video links.'],
+      library: ['Media & Datasets Library', 'Stream downloaded and AI-enhanced videos directly in your browser.'],
+      jobs: ['Active Jobs Queue', 'Monitor real-time progress across downloads and AI enhancement tasks.']
+    };
+
+    function switchView(viewId) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === viewId));
+      document.querySelectorAll('.view-section').forEach(el => el.classList.toggle('active', el.id === `view-${viewId}`));
+      document.getElementById('viewTitle').textContent = VIEW_META[viewId][0];
+      document.getElementById('viewDesc').textContent = VIEW_META[viewId][1];
+      if (viewId === 'jobs') loadJobs();
+      if (viewId === 'library') loadHistory();
+    }
+
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.addEventListener('click', () => switchView(el.dataset.view));
+    });
+
+    document.getElementById('openFolderTopBtn').addEventListener('click', () => {
+      fetch('/api/open-folder', { method: 'POST' });
+    });
+
+    // Telemetry
+    async function loadSystemStatus() {
+      try {
+        const [enhRes, scrRes] = await Promise.all([
+          fetch('/api/enhance/status'),
+          fetch('/api/scrape/status')
+        ]);
+        if (enhRes.ok) {
+          const d = await enhRes.json();
+          const dotGpu = document.getElementById('dotGpu');
+          const telGpu = document.getElementById('telGpu');
+          const dotFf = document.getElementById('dotFfmpeg');
+          const telFf = document.getElementById('telFfmpeg');
+
+          if (d.available) {
+            dotGpu.className = d.cuda_available ? 'dot ok' : 'dot warn';
+            telGpu.textContent = d.cuda_available ? d.gpu_name : 'CPU Mode';
+          } else {
+            dotGpu.className = 'dot warn';
+            telGpu.textContent = 'Deps Missing';
+          }
+          dotFf.className = d.ffmpeg_available ? 'dot ok' : 'dot warn';
+          telFf.textContent = d.ffmpeg_available ? 'Ready' : 'Not Found';
+
+          const modelSel = document.getElementById('enhanceModelSelect');
+          modelSel.innerHTML = '<option value="">Default RRDBNet</option>';
+          (d.models || []).forEach(m => {
+            const o = document.createElement('option');
+            o.value = m; o.textContent = m;
+            modelSel.appendChild(o);
+          });
+        }
+        if (scrRes.ok) {
+          const s = await scrRes.json();
+          document.getElementById('dotScraper').className = s.available ? 'dot ok' : 'dot warn';
+          document.getElementById('telScraper').textContent = s.available ? 'Ready' : 'Deps Missing';
+        }
+      } catch (e) {}
+    }
+
+    // DOWNLOADER
+    const dlSingleTab = document.getElementById('dlSingleTab');
+    const dlBatchTab = document.getElementById('dlBatchTab');
+    const dlSinglePanel = document.getElementById('dlSinglePanel');
+    const dlBatchPanel = document.getElementById('dlBatchPanel');
+    const singlePreviewCard = document.getElementById('singlePreviewCard');
+    let currentQuality = 'best';
+    let previewData = null;
+    let singlePollTimer = null;
+
+    dlSingleTab.addEventListener('click', () => {
+      dlSingleTab.classList.add('active'); dlBatchTab.classList.remove('active');
+      dlSinglePanel.style.display = 'block'; dlBatchPanel.style.display = 'none';
+      if (previewData) singlePreviewCard.style.display = 'block';
+    });
+
+    dlBatchTab.addEventListener('click', () => {
+      dlBatchTab.classList.add('active'); dlSingleTab.classList.remove('active');
+      dlBatchPanel.style.display = 'block'; dlSinglePanel.style.display = 'none';
+      singlePreviewCard.style.display = 'none';
+    });
+
+    document.querySelectorAll('.quality-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.quality-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentQuality = btn.dataset.quality;
+      });
+    });
+
+    const singleUrlInput = document.getElementById('singleUrlInput');
+    const singleAnalyzeBtn = document.getElementById('singleAnalyzeBtn');
+    const useCookiesCheck = document.getElementById('useCookiesCheck');
+
+    document.getElementById('singlePasteBtn').addEventListener('click', async () => {
+      try {
+        singleUrlInput.value = await navigator.clipboard.readText();
+        analyzeSingle();
+      } catch (e) { singleUrlInput.focus(); }
+    });
+    singleAnalyzeBtn.addEventListener('click', analyzeSingle);
+    singleUrlInput.addEventListener('keydown', e => { if (e.key === 'Enter') analyzeSingle(); });
+
+    async function analyzeSingle() {
+      const url = singleUrlInput.value.trim();
+      if (!url) return showToast('Please enter a video URL.', 'error');
+      singleAnalyzeBtn.disabled = true;
+      singleAnalyzeBtn.innerHTML = '<div class="spinner"></div> Analyzing...';
+      try {
+        const res = await fetch('/api/info', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ url, use_chrome_cookies: useCookiesCheck.checked })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.detail || 'Metadata extraction failed.');
+        previewData = data.data;
+        document.getElementById('previewTitle').textContent = previewData.title;
+        document.getElementById('previewAuthor').textContent = `${previewData.uploader} • ${previewData.extractor}`;
+        const playerArea = document.getElementById('playerArea');
+        if (previewData.preview_stream_url) {
+          playerArea.innerHTML = `<video src="${previewData.preview_stream_url}" controls poster="${previewData.thumbnail || ''}"></video>`;
+        } else if (previewData.embed_url) {
+          playerArea.innerHTML = `<iframe src="${previewData.embed_url}" allowfullscreen></iframe>`;
+        } else {
+          playerArea.innerHTML = `<img src="${previewData.thumbnail || ''}" />`;
+        }
+        singlePreviewCard.style.display = 'block';
+        document.getElementById('singleProgressBox').style.display = 'none';
+        showToast('Video analyzed and ready!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        singleAnalyzeBtn.disabled = false;
+        singleAnalyzeBtn.textContent = 'Analyze & Preview';
+      }
+    }
+
+    const startSingleDownloadBtn = document.getElementById('startSingleDownloadBtn');
+    startSingleDownloadBtn.addEventListener('click', async () => {
+      const url = singleUrlInput.value.trim();
+      if (!url) return;
+      startSingleDownloadBtn.disabled = true;
+      startSingleDownloadBtn.innerHTML = '<div class="spinner"></div> Starting...';
+      document.getElementById('singleProgressBox').style.display = 'block';
+      const fill = document.getElementById('progFill');
+      fill.style.width = '0%'; fill.classList.remove('enhancing');
+
+      try {
+        const res = await fetch('/api/download', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            url,
+            quality: currentQuality,
+            use_chrome_cookies: useCookiesCheck.checked,
+            auto_enhance: document.getElementById('singleAutoEnhanceCheck').checked,
+            enhance_scale: parseInt(document.getElementById('singleEnhanceScale').value, 10),
+            enhance_use_gpu: document.getElementById('singleEnhanceDevice').value === 'gpu'
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail);
+        pollSingleJob(data.job_id);
+      } catch (err) {
+        showToast(err.message, 'error');
+        startSingleDownloadBtn.disabled = false;
+        startSingleDownloadBtn.textContent = '⚡ Fast Download Video';
+      }
+    });
+
+    function pollSingleJob(jobId) {
+      if (singlePollTimer) clearInterval(singlePollTimer);
+      singlePollTimer = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/progress/${jobId}`);
+          if (!res.ok) return;
+          const job = await res.json();
+          const p = job.progress || {};
+          const fill = document.getElementById('progFill');
+          const pct = document.getElementById('progPct');
+          const state = document.getElementById('progState');
+          const speed = document.getElementById('progSpeed');
+          const eta = document.getElementById('progEta');
+
+          if (job.status === 'downloading' || job.status === 'enhancing') {
+            fill.classList.toggle('enhancing', job.status === 'enhancing');
+            fill.style.width = (p.percent || 0) + '%';
+            pct.textContent = Math.round(p.percent || 0) + '%';
+            speed.textContent = `Speed: ${p.speed_str || '--'}`;
+            eta.textContent = `ETA: ${p.eta_str || '--'}`;
+            state.textContent = p.message || job.status;
+          } else if (job.status === 'completed') {
+            clearInterval(singlePollTimer);
+            fill.style.width = '100%'; pct.textContent = '100%';
+            state.textContent = job.result?.enhanced
+              ? `✓ Downloaded & AI Enhanced (${job.result.enhanced.output_resolution})!`
+              : '✓ Completed and saved!';
+            startSingleDownloadBtn.disabled = false;
+            startSingleDownloadBtn.textContent = '⚡ Download Another';
+            showToast('Download job completed!', 'success');
+            loadHistory();
+          } else if (job.status === 'failed') {
+            clearInterval(singlePollTimer);
+            showToast(job.error || 'Job failed', 'error');
+            startSingleDownloadBtn.disabled = false;
+            startSingleDownloadBtn.textContent = '⚡ Retry Download';
+          }
+        } catch (e) {}
+      }, 700);
+    }
+
+    // Batch Download
+    function getBatchUrls() {
+      return document.getElementById('batchUrlsInput').value.split('\n').map(u => u.trim()).filter(u => u.length > 5);
+    }
+
+    document.getElementById('batchAnalyzeBtn').addEventListener('click', async () => {
+      const urls = getBatchUrls();
+      if (!urls.length) return showToast('Paste at least one URL.', 'error');
+      const btn = document.getElementById('batchAnalyzeBtn');
+      btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Probing...';
+      try {
+        const res = await fetch('/api/batch-info', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ urls, use_chrome_cookies: document.getElementById('batchCookiesCheck').checked })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail);
+        const container = document.getElementById('batchContainer');
+        container.style.display = 'block';
+        container.innerHTML = data.results.map(item => item.success
+          ? `<div class="list-item"><div style="display:flex;align-items:center;gap:10px;"><img src="${item.data.thumbnail || ''}" style="width:56px;height:36px;object-fit:cover;border-radius:6px;background:#000;" /><div><div style="font-size:13px;font-weight:600;">${item.data.title}</div><div style="font-size:11.5px;color:var(--accent);">${item.data.uploader} • ${item.data.duration_string}</div></div></div><span class="badge badge-emerald">Ready</span></div>`
+          : `<div class="list-item"><span style="color:#fca5a5;font-size:12.5px;">❌ ${item.url}: ${item.error}</span></div>`
+        ).join('');
+      } catch (e) {
+        showToast(e.message, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '🔍 Preview All';
+      }
+    });
+
+    document.getElementById('batchDownloadAllBtn').addEventListener('click', async () => {
+      const urls = getBatchUrls();
+      if (!urls.length) return showToast('Paste at least one URL.', 'error');
+      const btn = document.getElementById('batchDownloadAllBtn');
+      btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Starting...';
+      try {
+        const res = await fetch('/api/batch-download', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            urls,
+            quality: currentQuality,
+            use_chrome_cookies: document.getElementById('batchCookiesCheck').checked,
+            auto_enhance: document.getElementById('batchAutoEnhanceCheck').checked,
+            enhance_scale: parseInt(document.getElementById('batchEnhanceScale').value, 10)
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail);
+        showToast(`Queued ${data.jobs.length} batch jobs! Check Jobs Queue or progress below.`, 'success');
+        const container = document.getElementById('batchContainer');
+        container.style.display = 'block';
+        container.innerHTML = data.jobs.map(j => `
+          <div class="list-item" id="batch-job-${j.id}">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.url}</div>
+              <div class="b-status" style="font-size:11.5px;color:var(--text-muted);">Queued...</div>
+            </div>
+            <div style="width:140px;">
+              <div class="b-pct" style="font-size:11px;text-align:right;font-weight:700;">0%</div>
+              <div class="progress-bg" style="height:6px;margin:4px 0 0;"><div class="progress-fill b-fill" style="width:0%;"></div></div>
+            </div>
+          </div>`).join('');
+
+        const timer = setInterval(async () => {
+          let done = true;
+          for (const j of data.jobs) {
+            const r = await fetch(`/api/progress/${j.id}`);
+            if (!r.ok) continue;
+            const st = await r.json();
+            const el = document.getElementById(`batch-job-${j.id}`);
+            if (!el) continue;
+            const p = st.progress || {};
+            if (st.status === 'downloading' || st.status === 'enhancing') {
+              done = false;
+              el.querySelector('.b-fill').style.width = (p.percent || 0) + '%';
+              el.querySelector('.b-pct').textContent = Math.round(p.percent || 0) + '%';
+              el.querySelector('.b-status').textContent = p.message || st.status;
+            } else if (st.status === 'completed') {
+              el.querySelector('.b-fill').style.width = '100%';
+              el.querySelector('.b-pct').textContent = '100%';
+              el.querySelector('.b-status').textContent = `✓ ${st.result?.filename || 'Saved'}`;
+            } else if (st.status === 'failed') {
+              el.querySelector('.b-status').textContent = '❌ Failed';
+            } else { done = false; }
+          }
+          if (done) {
+            clearInterval(timer);
+            btn.disabled = false; btn.textContent = '⚡ Download All';
+            loadHistory();
+          }
+        }, 800);
+      } catch (e) {
+        showToast(e.message, 'error');
+        btn.disabled = false; btn.textContent = '⚡ Download All';
+      }
+    });
+
+    // AI ENHANCER
+    let selectedUploadFile = null;
+    let enhPollTimer = null;
+    const enhanceDropzone = document.getElementById('enhanceDropzone');
+    const enhanceFileInput = document.getElementById('enhanceFileInput');
+
+    enhanceDropzone.addEventListener('click', () => enhanceFileInput.click());
+    enhanceDropzone.addEventListener('dragover', e => { e.preventDefault(); enhanceDropzone.classList.add('dragover'); });
+    enhanceDropzone.addEventListener('dragleave', () => enhanceDropzone.classList.remove('dragover'));
+    enhanceDropzone.addEventListener('drop', e => {
+      e.preventDefault(); enhanceDropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        selectedUploadFile = e.dataTransfer.files[0];
+        document.getElementById('selectedUploadName').textContent = `Selected: ${selectedUploadFile.name}`;
+        document.getElementById('enhanceLibrarySelect').value = '';
+      }
+    });
+    enhanceFileInput.addEventListener('change', () => {
+      if (enhanceFileInput.files.length) {
+        selectedUploadFile = enhanceFileInput.files[0];
+        document.getElementById('selectedUploadName').textContent = `Selected: ${selectedUploadFile.name}`;
+        document.getElementById('enhanceLibrarySelect').value = '';
+      }
+    });
+
+    document.getElementById('startEnhanceBtn').addEventListener('click', () => runEnhancement());
+
+    async function runEnhancement(overrideFilename = null, overrideScale = null) {
+      const btn = document.getElementById('startEnhanceBtn');
+      const scale = overrideScale || parseInt(document.getElementById('enhanceScaleSelect').value, 10);
+      const tileSize = parseInt(document.getElementById('enhanceTileSelect').value, 10);
+      const useGpu = document.getElementById('enhanceDeviceSelect').value === 'gpu';
+      const modelPath = document.getElementById('enhanceModelSelect').value || null;
+
+      btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Starting AI Enhancer...';
+      document.getElementById('enhanceProgressBox').style.display = 'block';
+
+      try {
+        let res;
+        if (!overrideFilename && selectedUploadFile) {
+          const fd = new FormData();
+          fd.append('file', selectedUploadFile);
+          fd.append('scale', scale);
+          fd.append('tile_size', tileSize);
+          fd.append('use_gpu', useGpu);
+          if (modelPath) fd.append('model_path', modelPath);
+          res = await fetch('/api/enhance-upload', { method: 'POST', body: fd });
+        } else {
+          const filename = overrideFilename || document.getElementById('enhanceLibrarySelect').value || null;
+          const filepath = (!filename && document.getElementById('enhanceLocalPathInput').value.trim()) || null;
+          if (!filename && !filepath) throw new Error('Select a video, upload a file, or enter a local path.');
+          res = await fetch('/api/enhance', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ filename, filepath, scale, tile_size: tileSize, use_gpu: useGpu, model_path: modelPath })
+          });
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Failed to start enhancement.');
+
+        if (enhPollTimer) clearInterval(enhPollTimer);
+        enhPollTimer = setInterval(async () => {
+          const r = await fetch(`/api/progress/${data.job_id}`);
+          if (!r.ok) return;
+          const job = await r.json();
+          const p = job.progress || {};
+          document.getElementById('enhProgFill').style.width = (p.percent || 0) + '%';
+          document.getElementById('enhProgPct').textContent = Math.round(p.percent || 0) + '%';
+          document.getElementById('enhProgSpeed').textContent = `Speed: ${p.speed_str || '--'}`;
+          document.getElementById('enhProgEta').textContent = `ETA: ${p.eta_str || '--'}`;
+          document.getElementById('enhProgState').textContent = p.message || job.status;
+
+          if (job.status === 'completed') {
+            clearInterval(enhPollTimer);
+            btn.disabled = false; btn.textContent = '✨ Enhance Another Video';
+            showToast(`Enhanced saved: ${job.result?.filename}`, 'success');
+            loadHistory();
+          } else if (job.status === 'failed') {
+            clearInterval(enhPollTimer);
+            btn.disabled = false; btn.textContent = '✨ Retry Enhancement';
+            showToast(job.error || 'Enhancement failed', 'error');
+          }
+        }, 700);
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false; btn.textContent = '✨ Enhance Video Now';
+      }
+    }
+
+    // WEB SCRAPER
+    let currentScrapeMode = 'auto';
+    let scrapeColumns = [];
+    let scrapeRecords = [];
+    let discoveredMediaUrls = [];
+    let scrapeSortCol = null;
+    let scrapeSortAsc = true;
+
+    document.getElementById('toggleScrapeAdvancedBtn').addEventListener('click', () => {
+      const d = document.getElementById('scrapeAdvancedDrawer');
+      d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('.mode-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentScrapeMode = card.dataset.mode;
+        document.getElementById('customSelectorsDrawer').style.display =
+          currentScrapeMode === 'selectors' ? 'block' : 'none';
+      });
+    });
+
+    document.querySelectorAll('[data-scrapetab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-scrapetab]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.scrapetab;
+        ['table', 'schema', 'json'].forEach(t => {
+          document.getElementById(`scrapeTab-${t}`).style.display = t === tab ? 'block' : 'none';
+        });
+      });
+    });
+
+    const scrapePagesRange = document.getElementById('scrapePagesRange');
+    scrapePagesRange.addEventListener('input', () => {
+      const v = scrapePagesRange.value;
+      document.getElementById('scrapePagesBadge').textContent = v === '1' ? '1 page' : `${v} pages`;
+    });
+
+    document.getElementById('startScrapeBtn').addEventListener('click', runScrape);
+    document.getElementById('scrapeUrlInput').addEventListener('keydown', e => { if (e.key === 'Enter') runScrape(); });
+
+    async function runScrape() {
+      const url = document.getElementById('scrapeUrlInput').value.trim();
+      if (!url) return showToast('Enter a website URL to scrape.', 'error');
+      const btn = document.getElementById('startScrapeBtn');
+      btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Scraping...';
+
+      let fieldsObj = null;
+      const itemSelector = document.getElementById('scrapeItemSelector').value.trim() || null;
+      if (currentScrapeMode === 'selectors') {
+        try {
+          fieldsObj = JSON.parse(document.getElementById('scrapeFieldsJson').value || '{}');
+        } catch (e) {
+          btn.disabled = false; btn.textContent = '🕷️ Scrape Website';
+          return showToast('Invalid JSON in Fields selector.', 'error');
+        }
+      }
+
+      let customHeaders = null;
+      const rawHeaders = document.getElementById('scrapeHeadersInput').value.trim();
+      if (rawHeaders) {
+        try {
+          customHeaders = JSON.parse(rawHeaders);
+        } catch (e) {
+          btn.disabled = false; btn.textContent = '🕷️ Scrape Website';
+          return showToast('Invalid JSON in Custom Headers.', 'error');
+        }
+      }
+
+      try {
+        const res = await fetch('/api/scrape', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            url,
+            mode: currentScrapeMode,
+            pages: parseInt(scrapePagesRange.value, 10),
+            item_selector: itemSelector,
+            fields: fieldsObj,
+            delay: parseFloat(document.getElementById('scrapeDelayInput').value || '0.5'),
+            proxy: document.getElementById('scrapeProxyInput').value.trim() || null,
+            custom_headers: customHeaders,
+            deduplicate: document.getElementById('scrapeDedupCheck').checked
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Scrape failed.');
+
+        applyScrapePayload(data);
+        loadScrapeHistory();
+        showToast(`Extracted ${data.total_rows} rows (${data.strategy})!`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '🕷️ Scrape Website';
+      }
+    }
+
+    function applyScrapePayload(data) {
+      scrapeColumns = data.columns || [];
+      scrapeRecords = data.records || [];
+      discoveredMediaUrls = data.discovered_media_urls || [];
+      scrapeSortCol = null;
+
+      const tel = data.telemetry || {};
+      document.getElementById('scrapeHttpBadge').textContent = `HTTP ${tel.status_code || 200}`;
+      document.getElementById('scrapeLatencyBadge').textContent = `${tel.latency_ms ?? '--'} ms`;
+      document.getElementById('scrapeSizeBadge').textContent = `${tel.size_kb ?? '--'} KB`;
+      document.getElementById('scrapeStrategyBadge').textContent = `Strategy: ${data.strategy}`;
+      document.getElementById('scrapeRowsBadge').textContent = `${data.total_rows} rows`;
+      document.getElementById('scrapeDedupBadge').textContent = `${data.duplicates_removed || 0} deduped`;
+      document.getElementById('scrapeResultsCard').style.display = 'block';
+
+      renderScrapeTable(scrapeRecords);
+      renderScrapeSchema(data.schema_stats || []);
+      document.getElementById('scrapeRawJsonPre').textContent = JSON.stringify(scrapeRecords.slice(0, 100), null, 2);
+
+      const mediaCard = document.getElementById('discoveredMediaCard');
+      if (discoveredMediaUrls.length) {
+        mediaCard.style.display = 'block';
+        document.getElementById('mediaLinksCount').textContent = discoveredMediaUrls.length;
+        document.getElementById('discoveredMediaList').innerHTML = discoveredMediaUrls.map(u => `
+          <div class="list-item" style="padding: 8px 12px;">
+            <span style="font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${u}</span>
+            <button class="btn btn-primary btn-sm send-media-btn" data-url="${encodeURIComponent(u)}">⚡ Download</button>
+          </div>`).join('');
+        document.querySelectorAll('.send-media-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            const u = decodeURIComponent(b.dataset.url);
+            switchView('downloader');
+            dlSingleTab.click();
+            singleUrlInput.value = u;
+            analyzeSingle();
+          });
+        });
+      } else {
+        mediaCard.style.display = 'none';
+      }
+    }
+
+    async function loadScrapeHistory() {
+      try {
+        const res = await fetch('/api/scrape/history');
+        if (!res.ok) return;
+        const data = await res.json();
+        const bar = document.getElementById('scrapeHistoryBar');
+        const hist = data.history || [];
+        if (!hist.length) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+        bar.innerHTML = '<span style="font-size:12px;color:var(--text-muted);font-weight:600;">Recent:</span>' +
+          hist.slice(0, 6).map(h => {
+            let host = h.url;
+            try { host = new URL(h.url).hostname; } catch (e) {}
+            return `<button class="btn btn-secondary btn-sm hist-scrape-btn" data-id="${h.scrape_id}">${host} (${h.total_rows})</button>`;
+          }).join('');
+        bar.querySelectorAll('.hist-scrape-btn').forEach(b => {
+          b.addEventListener('click', async () => {
+            const r = await fetch(`/api/scrape/history/${b.dataset.id}`);
+            if (r.ok) {
+              applyScrapePayload(await r.json());
+              showToast('Loaded dataset from session history.');
+            }
+          });
+        });
+      } catch (e) {}
+    }
+
+    function renderScrapeSchema(stats) {
+      const container = document.getElementById('scrapeSchemaList');
+      container.innerHTML = stats.map(s => `
+        <div style="padding:12px;border-radius:10px;background:rgba(15,23,42,0.75);border:1px solid var(--card-border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <strong style="font-size:13px;color:#fff;">${s.name}</strong>
+            <span class="badge">${s.dtype}</span>
+          </div>
+          <div class="progress-bg" style="height:6px;margin:6px 0;"><div class="progress-fill" style="width:${s.completeness_pct}%;"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);">
+            <span>${s.completeness_pct}% filled</span>
+            <span>${s.unique_count} unique</span>
+          </div>
+          ${s.sample ? `<div style="margin-top:6px;font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">e.g. ${s.sample}</div>` : ''}
+        </div>`).join('');
+    }
+
+    document.getElementById('copyRawJsonBtn').addEventListener('click', () => {
+      navigator.clipboard?.writeText(document.getElementById('scrapeRawJsonPre').textContent);
+      showToast('Copied JSON to clipboard!', 'success');
+    });
+
+    document.getElementById('sendAllMediaToBatchBtn').addEventListener('click', () => {
+      if (!discoveredMediaUrls.length) return;
+      switchView('downloader');
+      dlBatchTab.click();
+      document.getElementById('batchUrlsInput').value = discoveredMediaUrls.join('\n');
+      showToast(`Loaded ${discoveredMediaUrls.length} links into Batch Downloader.`, 'success');
+    });
+
+    function renderScrapeTable(rows) {
+      const head = document.getElementById('scrapeTableHead');
+      const body = document.getElementById('scrapeTableBody');
+      head.innerHTML = scrapeColumns.map(c => {
+        const arrow = scrapeSortCol === c ? (scrapeSortAsc ? ' ▲' : ' ▼') : '';
+        return `<th data-col="${c}">${c}${arrow}</th>`;
+      }).join('');
+
+      head.querySelectorAll('th').forEach(th => {
+        th.addEventListener('click', () => {
+          const col = th.dataset.col;
+          if (scrapeSortCol === col) scrapeSortAsc = !scrapeSortAsc;
+          else { scrapeSortCol = col; scrapeSortAsc = true; }
+          const sorted = [...rows].sort((a, b) => {
+            const va = String(a[col] ?? '').toLowerCase();
+            const vb = String(b[col] ?? '').toLowerCase();
+            return scrapeSortAsc ? va.localeCompare(vb, undefined, { numeric: true }) : vb.localeCompare(va, undefined, { numeric: true });
+          });
+          renderScrapeTable(sorted);
+        });
+      });
+
+      body.innerHTML = rows.map(r => `
+        <tr>${scrapeColumns.map(c => {
+          const v = r[c] !== null && r[c] !== undefined ? String(r[c]) : '';
+          return `<td title="${v.replace(/"/g, '&quot;')}">${v}</td>`;
+        }).join('')}</tr>`).join('');
+
+      body.querySelectorAll('td').forEach(td => {
+        td.addEventListener('click', () => {
+          if (!td.textContent) return;
+          navigator.clipboard?.writeText(td.textContent);
+          showToast('Copied cell value to clipboard!');
+        });
+      });
+    }
+
+    document.getElementById('scrapeFilterInput').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) return renderScrapeTable(scrapeRecords);
+      const filtered = scrapeRecords.filter(r =>
+        scrapeColumns.some(c => String(r[c] || '').toLowerCase().includes(q))
+      );
+      renderScrapeTable(filtered);
+    });
+
+    // MEDIA LIBRARY
+    let libraryFiles = [];
+    let libraryFilter = 'all';
+
+    document.querySelectorAll('[data-libfilter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-libfilter]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        libraryFilter = btn.dataset.libfilter;
+        renderLibrary();
+      });
+    });
+    document.getElementById('librarySearchInput').addEventListener('input', renderLibrary);
+
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/downloads');
+        if (!res.ok) return;
+        const data = await res.json();
+        libraryFiles = data.files || [];
+        document.getElementById('libraryCountPill').textContent = libraryFiles.length;
+
+        const sel = document.getElementById('enhanceLibrarySelect');
+        const prev = sel.value;
+        sel.innerHTML = '<option value="">-- Select downloaded video --</option>';
+        libraryFiles.filter(f => f.is_video).forEach(f => {
+          const o = document.createElement('option');
+          o.value = f.name; o.textContent = `${f.name} (${f.size_mb} MB)`;
+          sel.appendChild(o);
+        });
+        if (prev) sel.value = prev;
+        renderLibrary();
+      } catch (e) {}
+    }
+
+    function renderLibrary() {
+      const q = document.getElementById('librarySearchInput').value.toLowerCase().trim();
+      const filtered = libraryFiles.filter(f => {
+        if (libraryFilter === 'video' && !f.is_video) return false;
+        if (libraryFilter === 'enhanced' && !f.is_enhanced) return false;
+        if (libraryFilter === 'audio' && !f.is_audio) return false;
+        if (q && !f.name.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      const list = document.getElementById('downloadsHistoryList');
+      if (!filtered.length) {
+        list.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 24px;">No matching files found.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(f => `
+        <div class="list-item">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>
+              ${f.is_enhanced ? '<span class="badge badge-purple">AI Enhanced</span>' : ''}
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);">${f.size_mb} MB</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;">
+            ${f.is_video ? `<button class="btn btn-secondary btn-sm play-btn" data-filename="${encodeURIComponent(f.name)}">▶️ Play</button>` : ''}
+            ${(f.is_video && !f.is_enhanced) ? `<button class="btn btn-purple btn-sm enh-quick-btn" data-filename="${encodeURIComponent(f.name)}">✨ Enhance 2x</button>` : ''}
+            <button class="btn btn-danger btn-sm del-btn" data-filename="${encodeURIComponent(f.name)}">🗑️</button>
+          </div>
+        </div>`).join('');
+
+      document.querySelectorAll('.play-btn').forEach(b => b.addEventListener('click', () => {
+        const name = decodeURIComponent(b.dataset.filename);
+        document.getElementById('modalVideoTitle').textContent = name;
+        document.getElementById('modalVideoElement').src = `/api/stream-file?filename=${encodeURIComponent(name)}`;
+        document.getElementById('videoModal').style.display = 'flex';
+      }));
+
+      document.querySelectorAll('.enh-quick-btn').forEach(b => b.addEventListener('click', () => {
+        const name = decodeURIComponent(b.dataset.filename);
+        switchView('enhancer');
+        document.getElementById('enhanceLibrarySelect').value = name;
+        runEnhancement(name, 2);
+      }));
+
+      document.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', async () => {
+        const name = decodeURIComponent(b.dataset.filename);
+        const res = await fetch('/api/downloads/delete', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ filename: name })
+        });
+        if (res.ok) {
+          showToast(`Deleted ${name}`, 'success');
+          loadHistory();
+        }
+      }));
+    }
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      const v = document.getElementById('modalVideoElement');
+      v.pause(); v.src = '';
+      document.getElementById('videoModal').style.display = 'none';
+    });
+
+    // JOBS QUEUE
+    async function loadJobs() {
+      try {
+        const res = await fetch('/api/jobs');
+        if (!res.ok) return;
+        const data = await res.json();
+        const jobs = data.jobs || [];
+        document.getElementById('jobsCountPill').textContent = jobs.filter(j => j.status === 'downloading' || j.status === 'enhancing' || j.status === 'queued').length;
+
+        const list = document.getElementById('jobsQueueList');
+        if (!jobs.length) {
+          list.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 24px;">No jobs started in this session yet.</div>';
+          return;
+        }
+        list.innerHTML = jobs.map(j => {
+          const p = j.progress || {};
+          const pct = j.status === 'completed' ? 100 : Math.round(p.percent || 0);
+          return `
+            <div class="list-item">
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span class="badge">${j.type || 'job'}</span>
+                  <span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.url || j.filename || j.id}</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${p.message || j.status} ${j.error ? '— ' + j.error : ''}</div>
+              </div>
+              <div style="width:140px;text-align:right;">
+                <span style="font-size:12px;font-weight:700;">${pct}%</span>
+                <div class="progress-bg" style="height:6px;margin:4px 0 0;"><div class="progress-fill ${j.status === 'enhancing' ? 'enhancing' : ''}" style="width:${pct}%;"></div></div>
+              </div>
+            </div>`;
+        }).join('');
+      } catch (e) {}
+    }
+
+    document.getElementById('refreshJobsBtn').addEventListener('click', loadJobs);
+    setInterval(loadJobs, 3000);
+
+    loadSystemStatus();
+    loadHistory();
+    loadJobs();
+  </script>
+</body>
+</html>
