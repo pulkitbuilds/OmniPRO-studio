@@ -412,12 +412,14 @@ def enhancer_status():
     if get_enhancer_capabilities is None:
         return {
             "available": False,
+            "is_vercel": IS_VERCEL,
             "error": ENHANCER_IMPORT_ERROR,
             "ffmpeg_available": FFMPEG_PATH is not None,
             "models": checkpoints,
         }
     caps = get_enhancer_capabilities()
     caps["available"] = True
+    caps["is_vercel"] = IS_VERCEL
     caps["models"] = checkpoints
     return caps
 

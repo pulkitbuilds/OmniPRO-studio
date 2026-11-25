@@ -657,6 +657,13 @@
 
     <!-- VIEW 2: AI VIDEO ENHANCER -->
     <section class="view-section" id="view-enhancer">
+      <div class="card" id="vercelEnhancerNotice" style="display: none; border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.08);">
+        <div style="font-weight: 700; font-size: 14px; color: #fcd34d; margin-bottom: 4px;">☁️ Running on Vercel Serverless</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+          PyTorch AI Super-Resolution (2x/4x) and FFmpeg video muxing exceed serverless limits and require local execution.
+          Use <strong>Web Scraper</strong> and <strong>Video Analyzer</strong> here, or launch <code>run_web.bat</code> locally for full AI Video Enhancement.
+        </div>
+      </div>
       <div class="card">
         <div class="dropzone" id="enhanceDropzone">
           <div style="font-size: 15px; font-weight: 700; color: #e9d5ff; margin-bottom: 4px;">
@@ -963,12 +970,16 @@
           if (d.available) {
             dotGpu.className = d.cuda_available ? 'dot ok' : 'dot warn';
             telGpu.textContent = d.cuda_available ? d.gpu_name : 'CPU Mode';
+          } else if (d.is_vercel) {
+            dotGpu.className = 'dot warn';
+            telGpu.textContent = 'Local Only';
+            document.getElementById('vercelEnhancerNotice').style.display = 'block';
           } else {
             dotGpu.className = 'dot warn';
-            telGpu.textContent = 'Deps Missing';
+            telGpu.textContent = 'Install Local Deps';
           }
           dotFf.className = d.ffmpeg_available ? 'dot ok' : 'dot warn';
-          telFf.textContent = d.ffmpeg_available ? 'Ready' : 'Not Found';
+          telFf.textContent = d.ffmpeg_available ? 'Ready' : (d.is_vercel ? 'Local Only' : 'Not Found');
 
           const modelSel = document.getElementById('enhanceModelSelect');
           modelSel.innerHTML = '<option value="">Default RRDBNet</option>';
